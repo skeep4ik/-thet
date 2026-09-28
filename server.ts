@@ -147,7 +147,77 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json({ limit: '10mb' }));
+  // --- Anti-DDoS & Security Headers Middleware ---
+  app.use((req, res, next) => {
+    // Security Headers
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('X-DDoS-Protection', 'active; rate-limit=120/min');
+
+    // CORS Headers for API
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(204);
+    }
+    next();
+  });
+
+  // Strict payload size limit to prevent memory buffer exhaustion attacks
+  app.use(express.json({ limit: '2mb' }));
+
+  // In-Memory Rate Limiter Store: IP -> { count, windowStart }
+  const rateLimitMap = new Map<string, { count: number; windowStart: number }>();
+  const WINDOW_MS = 60 * 1000; // 1 minute window
+  const MAX_REQUESTS_PER_MIN = 120; // 120 requests/min per IP
+
+  // Cleanup rate limiter map every 5 minutes to prevent memory leaks
+  setInterval(() => {
+    const now = Date.now();
+    rateLimitMap.forEach((data, ip) => {
+      if (now - data.windowStart > WINDOW_MS) {
+        rateLimitMap.delete(ip);
+      }
+    });
+  }, 5 * 60 * 1000);
+
+  // Rate Limiting Middleware
+  const rateLimiter = (maxRequests = MAX_REQUESTS_PER_MIN) => {
+    return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.socket.remoteAddress || 'unknown-ip';
+      const now = Date.now();
+      const record = rateLimitMap.get(clientIp) || { count: 0, windowStart: now };
+
+      if (now - record.windowStart > WINDOW_MS) {
+        record.count = 1;
+        record.windowStart = now;
+      } else {
+        record.count += 1;
+      }
+
+      rateLimitMap.set(clientIp, record);
+
+      res.setHeader('X-RateLimit-Limit', String(maxRequests));
+      res.setHeader('X-RateLimit-Remaining', String(Math.max(0, maxRequests - record.count)));
+
+      if (record.count > maxRequests) {
+        res.setHeader('Retry-After', '60');
+        return res.status(429).json({
+          error: 'Превышен лимит запросов. Защита от DDoS активирована.',
+          retryAfter: 60,
+        });
+      }
+
+      next();
+    };
+  };
+
+  // Apply general rate limit to all API routes
+  app.use('/api', rateLimiter(120));
 
   // In-memory presence tracker: staticId -> timestamp
   const activePresence = new Map<string, number>();

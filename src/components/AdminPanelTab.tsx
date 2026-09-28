@@ -194,6 +194,9 @@ export const AdminPanelTab: React.FC<AdminPanelTabProps> = ({
                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
                   AUTO-APPROVAL ACTIVE
                 </span>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                  🛡️ DDoS PROTECTED
+                </span>
               </div>
               <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
                 Управление составом администраторов, сводка начислений и реестр смен
@@ -252,6 +255,34 @@ export const AdminPanelTab: React.FC<AdminPanelTabProps> = ({
               <RotateCcw className="w-4 h-4" />
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* DDoS & Anti-Flood Security Status Card */}
+      <div className="bg-emerald-950/20 border border-emerald-500/30 rounded-3xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs shadow-md">
+        <div className="flex items-center space-x-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0 shadow-xs">
+            <ShieldCheck className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="font-extrabold text-emerald-400 font-mono uppercase tracking-wider text-sm">
+                🛡️ Защита от DDoS и спам-атак активна
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                ACTIVE
+              </span>
+            </div>
+            <p className="text-zinc-400 text-xs mt-0.5">
+              Скользящий лимит запросов (120 req/мин на IP), фильтрация трафика, ограничение размера данных (2MB Body Guard) и заголовки безопасности HTTP.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-2.5 font-mono text-[11px] text-zinc-300 bg-black/60 px-3.5 py-2 rounded-2xl border border-zinc-800 shrink-0">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span>Rate Limit: 120/мин</span>
+          <span className="text-zinc-700">|</span>
+          <span>Flood Guard</span>
         </div>
       </div>
 
