@@ -81,7 +81,7 @@ export const InstructorsTab: React.FC<InstructorsTabProps> = ({
       const isSuperAdmin = user.staticId === SUPER_ADMIN_ID || user.role === 'superadmin';
       const isChief = user.role === 'admin' || (admins.includes(user.staticId) && !isSuperAdmin);
       const isDeputyChief = user.role === 'senior_instructor';
-      const isOnline = onlineUsers.includes(user.staticId);
+      const isOnline = user.staticId === currentUser.staticId || onlineUsers.includes(user.staticId);
 
       return {
         ...user,

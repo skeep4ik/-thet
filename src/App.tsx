@@ -318,6 +318,13 @@ function MainApp() {
     return reports.filter((r) => r.userId === currentUser.staticId).length;
   }, [reports, currentUser]);
 
+  const activeOnlineUsers = useMemo(() => {
+    if (!currentUser?.staticId) return onlineUsers;
+    return onlineUsers.includes(currentUser.staticId)
+      ? onlineUsers
+      : [currentUser.staticId, ...onlineUsers];
+  }, [onlineUsers, currentUser]);
+
   const pendingReportsCount = 0;
 
   if (!currentUser) {
@@ -348,7 +355,7 @@ function MainApp() {
         onUpdateAvatar={(url) => handleUpdateUserAvatar(currentUser.staticId, url)}
         allReports={reports}
         onOpenMobileMenu={() => setIsMobileDrawerOpen(true)}
-        onlineUsers={onlineUsers}
+        onlineUsers={activeOnlineUsers}
         users={users}
         onOpenProfileModal={() => setIsProfileModalOpen(true)}
       />
@@ -407,7 +414,7 @@ function MainApp() {
                 onSelectReport={setSelectedReport}
                 showToast={showToast}
                 onUpdateUserAvatar={handleUpdateUserAvatar}
-                onlineUsers={onlineUsers}
+                onlineUsers={activeOnlineUsers}
                 onUpdateUserRole={handleUpdateUserRole}
               />
             </motion.div>
@@ -463,7 +470,7 @@ function MainApp() {
                 showToast={showToast}
                 onResetSeedData={handleResetSeedData}
                 onArchiveWeek={handleArchiveWeek}
-                onlineUsers={onlineUsers}
+                onlineUsers={activeOnlineUsers}
                 onUpdateUserRole={handleUpdateUserRole}
               />
             </motion.div>
