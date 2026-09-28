@@ -114,8 +114,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     ФСБ
                   </span>
                 </div>
-                <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-medium tracking-wide uppercase hidden 2xl:block font-mono whitespace-nowrap">
-                  Отдел кадров и боевой подготовки
+                <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-medium tracking-wide uppercase hidden sm:block font-mono whitespace-nowrap">
+                  Еженедельные отчёты
                 </span>
               </div>
             </button>
